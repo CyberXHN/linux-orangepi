@@ -111,7 +111,14 @@ static int axp22x_gpio_get_reg(unsigned int offset)
 
 static int axp22x_gpio_input(struct gpio_chip *chip, unsigned int offset)
 {
+/* stable v6.6.148+ backported this API change too (f53dd26462b8) */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 17)) || \
+	(LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 148) && \
+	 LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0))
+	return pinctrl_gpio_direction_input(chip, offset);
+#else
 	return pinctrl_gpio_direction_input(chip->base + offset);
+#endif
 }
 
 static int axp22x_gpio_get(struct gpio_chip *chip, unsigned int offset)

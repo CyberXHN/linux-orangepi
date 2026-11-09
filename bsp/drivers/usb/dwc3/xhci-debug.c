@@ -24,7 +24,7 @@ static int xhci_portsc_show(struct seq_file *s, void *unused)
 	u32			portsc;
 	char			str[XHCI_MSG_MAX];
 
-	portsc = readl(port->addr);
+	portsc = xhci_portsc_readl(port);
 	seq_printf(s, "%s\n", xhci_decode_portsc(str, portsc));
 
 	return 0;
@@ -82,11 +82,11 @@ static ssize_t xhci_port_write(struct file *file,  const char __user *ubuf,
 		}
 		sunxi_info(NULL, "Reset complete\n");
 
-		portsc = readl(port->addr);
+		portsc = xhci_portsc_readl(port);
 		sunxi_info(NULL, "portsc:0x%08x\n", portsc);
 		portsc &= ~PORT_POWER;
-		writel(portsc, port->addr);
-		sunxi_info(NULL, "portsc:0x%08x\n", readl(port->addr));
+		xhci_portsc_writel(port, portsc);
+		sunxi_info(NULL, "portsc:0x%08x\n", xhci_portsc_readl(port));
 		sunxi_info(NULL, "RESET XHCI Controller finished\n");
 		spin_unlock_irqrestore(&xhci->lock, flags);
 	} else {
@@ -111,7 +111,7 @@ static void xhci_debugfs_create_port(struct xhci_hcd *xhci,
 	struct xhci_port	*port;
 	struct dentry		*dir;
 
-	num_ports = HCS_MAX_PORTS(xhci->hcs_params1);
+	num_ports = xhci->max_ports;
 
 	parent = debugfs_lookup("ports", parent);
 
@@ -131,7 +131,7 @@ static void xhci_debugfs_destroy_port(struct xhci_hcd *xhci,
 	char			port_name[8];
 	struct dentry		*dir;
 
-	num_ports = HCS_MAX_PORTS(xhci->hcs_params1);
+	num_ports = xhci->max_ports;
 
 	parent = debugfs_lookup("ports", parent);
 

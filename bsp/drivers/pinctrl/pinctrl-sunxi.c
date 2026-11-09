@@ -2004,7 +2004,10 @@ static const struct pinmux_ops sunxi_pmx_ops = {
 static int sunxi_pinctrl_gpio_direction_input(struct gpio_chip *chip,
 					unsigned offset)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 17))
+/* stable v6.6.148+ backported this API change too (f53dd26462b8) */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 17)) || \
+	(LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 148) && \
+	 LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0))
 	return pinctrl_gpio_direction_input(chip, offset);
 #else
 	return pinctrl_gpio_direction_input(chip->base + offset);
@@ -2102,7 +2105,10 @@ static int sunxi_pinctrl_gpio_direction_output(struct gpio_chip *chip,
 					unsigned offset, int value)
 {
 	sunxi_pinctrl_gpio_set(chip, offset, value);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 17))
+/* stable v6.6.148+ backported this API change too (f53dd26462b8) */
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(6, 12, 17)) || \
+	(LINUX_VERSION_CODE >= KERNEL_VERSION(6, 6, 148) && \
+	 LINUX_VERSION_CODE < KERNEL_VERSION(6, 7, 0))
 	return pinctrl_gpio_direction_output(chip, offset);
 #else
 	return pinctrl_gpio_direction_output(chip->base + offset);
